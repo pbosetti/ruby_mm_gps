@@ -9,26 +9,44 @@ typedef union {
     uchar hi; 
   } b;
   uchar bs[2]; 
-} Bytes;
+} bytes_t;
 
-static ushort MMGPS_CRC16(const void *buf, ushort length) {
+static ushort CRC16(const void *buf, ushort length) {
   uchar *arr = (uchar *)buf; 
-  Bytes crc;
+  bytes_t crc;
   crc.w = 0xffff;
-  while(length--){ 
+  while(length--) { 
     char i;
     ushort odd;
     crc.b.lo ^= *arr++; 
-    for(i = 0; i< 8; i++){
+    for(i = 0; i< 8; i++) {
       odd = crc.w& 0x01; 
       crc.w >>= 1;
       if(odd)
-      crc.w ^= 0xa001;
+        crc.w ^= 0xa001;
     }
   } 
   return (ushort)crc.w;
-  
 }
+
+static VALUE mm_gps_CRC16(VALUE klass, VALUE str)
+{
+  Check_Type(str, T_STRING);
+  return rb_fix_new(CRC16(RSTRING_PTR(str), RSTRING_LEN(str)));
+}
+
+static VALUE mm_gps_add_CRC16(VALUE klass, VALUE str)
+{
+  union {
+    ushort u;
+    char   s[2];
+  } crc;
+  
+  Check_Type(str, T_STRING);
+  crc.u = CRC16(RSTRING_PTR(str), RSTRING_LEN(str));  
+  return rb_str_buf_cat(str, crc.s, 2);
+}
+
 
 VALUE rb_mMmGps;
 
@@ -36,4 +54,6 @@ void
 Init_mm_gps(void)
 {
   rb_mMmGps = rb_define_module("MmGps");
+  rb_define_singleton_method(rb_mMmGps, "crc16", mm_gps_CRC16, 1);
+  rb_define_singleton_method(rb_mMmGps, "append_crc16", mm_gps_add_CRC16, 1);
 }
