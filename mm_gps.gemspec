@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
 
   spec.summary       = %q{MarvelMind Indoor GPS driver.}
   spec.description   = %q{MarvelMind Indoor GPS driver.}
-  spec.homepage      = "https://github.com/pbosetti."
+  spec.homepage      = "https://github.com/pbosetti/ruby_mm_gps"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
