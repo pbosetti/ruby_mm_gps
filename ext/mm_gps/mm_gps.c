@@ -48,12 +48,12 @@ static VALUE mm_gps_add_CRC16(VALUE klass, VALUE str)
 }
 
 
-VALUE rb_mMmGps;
+VALUE rb_mMmGPS;
 
 void
 Init_mm_gps(void)
 {
-  rb_mMmGps = rb_define_module("MmGps");
-  rb_define_singleton_method(rb_mMmGps, "crc16", mm_gps_CRC16, 1);
-  rb_define_singleton_method(rb_mMmGps, "append_crc16", mm_gps_add_CRC16, 1);
+  rb_mMmGPS = rb_define_module("MmGPS");
+  rb_define_singleton_method(rb_mMmGPS, "crc16", mm_gps_CRC16, 1);
+  rb_define_singleton_method(rb_mMmGPS, "append_crc16", mm_gps_add_CRC16, 1);
 }

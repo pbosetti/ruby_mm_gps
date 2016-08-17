@@ -5,7 +5,7 @@ require 'mm_gps/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "mm_gps"
-  spec.version       = MmGps::VERSION
+  spec.version       = MmGPS::VERSION
   spec.authors       = ["Paolo Bosetti"]
   spec.email         = ["paolo.bosetti@unitn.it"]
 
@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
   spec.extensions    = ["ext/mm_gps/extconf.rb"]
+  spec.add_dependency "serialport", "~> 1.3.1"
 
   spec.add_development_dependency "bundler", "~> 1.12"
   spec.add_development_dependency "rake", "~> 10.0"
