@@ -1,5 +1,26 @@
 # Local Exception class.
-class MmGPSException < Exception; end
+#
+# The +@data+ attribute holds a Hash with informative content. In particular, 
+# +@data [:reason]+ holds a Symbol providing the internal error code, currently
+# one of the following:
+# 
+# - +:notype+   when the packet type code is neither 1 nor 2
+# - +:nocrc+    when the CRC16 check fails
+# - +:noavail+  when the serialport was not available for reading (timeout)
+# 
+# Typically, the last raw buffer is available in human readable format as:
+# 
+#     rescue MmGPSError => e
+#       puts MmGPS::hexify(e.data[:packet])
+#     end
+# 
+class MmGPSError < RuntimeError
+  attr_reader :data
+  def initialize(msg="Error in MmGPS class", data={})
+    @data = data
+    super(msg)
+  end
+end
 
 # Manage connection and data decoding with a MarvelMind beacon or hedgehog.
 module MmGPS
@@ -11,6 +32,17 @@ module MmGPS
     crc16(str) == 0
   end
   
+  # Returns a HEX description of a binary buffer
+  #
+  # @param buf [String] the input buffer
+  # @return [String] the HEX description
+  def self.hexify(buf)
+    len = buf.length
+    return (("%02X " * len) % buf.unpack("C#{len}")).chop
+  rescue NoMethodError
+    return '--'
+  end
+  
   # Parse the given buffer according to the MarvelMind protocol.
   # See http://www.marvelmind.com/pics/marvelmind_beacon_interfaces_v2016_03_07a.pdf
   #
@@ -18,7 +50,9 @@ module MmGPS
   # @return [Hash|Array] if the system is running, return a Hash with
   #   timestamp, coordinates, and error code (data code 0x0001). Otherwise returns an Array of Hashes for beacons status (data code 0x0002).
   def self.parse_packet(buf)
-    raise MmGPSException, "Invalid CRC" unless valid_crc16?(buf)
+    unless valid_crc16?(buf) then
+      raise MmGPSError.new("Invalid CRC", {reason: :nocrc, packet:buf, crc:crc16(buf)}) 
+    end
     # warn "Invalid CRC" unless valid_crc16?(buf)
     header = buf[0..5].unpack('CCS<C')
     if header[2] == 1 then # Regular GPS Data
@@ -37,7 +71,10 @@ module MmGPS
         %I(x y z).each {|k| result.last[k] /= 100.0}
       end
     else
-      raise MmGPSException, "Unexpected packet type #{header[2]}"
+      unless valid_crc16?(buf) then
+        raise MmGPSError.new("Unexpected packet type #{header[2]}",
+          {reason: :notype, packet:buf, crc:crc16(buf), type:header[2]}) 
+      end
     end
     return result
   end

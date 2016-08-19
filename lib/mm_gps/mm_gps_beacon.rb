@@ -5,17 +5,19 @@ module MmGPS
   class Beacon
     START_TOKEN = "\xFFG".force_encoding(Encoding::BINARY)
     EMPTY = ''.force_encoding(Encoding::BINARY)
+    attr_reader :last_pkt
     
     # Open a new connection on the given serial port. It also encapsulates
     # the underlying SerialPort object instance, setting a read timeout of 1 s
     # and enabling the binary mode.
     # 
     # @param port [String] 'COM1' on Windows, '/dev/ttyNNN' on *nix
-    # @param baus [Fixnum] baudrate, value must be supported by the platform
+    # @param baud [Fixnum] baudrate, value must be supported by the platform
     def initialize(port, baud = 115200)
       @sp = SerialPort.new(port, "baud" => baud)
       @sp.read_timeout = 1000 #1 sec
       @sp.binmode
+      @last_pkt = ''.force_encoding(Encoding::BINARY)
     end
     
     # Istalls a signal handler for the given signal, default to SIGINT, 
@@ -59,10 +61,17 @@ module MmGPS
     def get_raw_packet
       buf = START_TOKEN.dup
       while true do
-        buf << (@sp.read(1) || EMPTY)
+        char = @sp.read(1)
+        unless char
+          raise MmGPSError.new("Data unavailable", 
+            {reason: :noavail, packet:nil}) 
+        else
+          buf << char
+        end
         break if buf[-2..-1] == START_TOKEN
       end
-      return buf[0...-2]
+      @last_pkt = buf[0...-2]
+      return @last_pkt
     end
     
     # Reads a raw packet, checks its CRC, and returns its contents as a Hash.
@@ -70,6 +79,12 @@ module MmGPS
     # @return [Hash] typically in the form `%I(ts x y z f).zip(payload).to_h`
     def get_packet
       return MmGPS::parse_packet(self.get_raw_packet)
+    rescue MmGPSError => e
+      if e.data[:reason] == :noavail then
+        return nil
+      else 
+        raise e
+      end
     end
     
   end

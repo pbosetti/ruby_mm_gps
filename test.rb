@@ -10,8 +10,9 @@ beacon.trap # installs signal handler for CTRL-C
 puts "Syncing..."
 begin
   beacon.sync # discards any byte until the starting sequence "\xFFG" arrives
-rescue MmGPSException => e
-  puts "Packet Error: #{e.inspect}"
+rescue MmGPSError => e
+  puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
+  puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
 rescue IOError => e
   puts "Port closed #{e.inspect}"
   exit
@@ -21,8 +22,9 @@ puts "Reading..."
 while not beacon.closed? do
   begin
     p beacon.get_packet
-  rescue MmGPSException => e
-    puts "Packet Error: #{e.inspect}"
+  rescue MmGPSError => e
+    puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
+    puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
   rescue IOError => e
     puts "Port closed #{e.inspect}"
     exit
