@@ -36,8 +36,8 @@ puts "Syncing..."
 begin
   beacon.sync # discards any byte until the starting sequence "\xFFG" arrives
 rescue MmGPSError => e
-  puts "Packet Error: #{e.inspect}"
-  p e.data[:packet]
+  puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
+  puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
 rescue IOError => e
   puts "Port closed #{e.inspect}"
   exit
@@ -48,8 +48,8 @@ while not beacon.closed? do
   begin
     p beacon.get_packet
   rescue MmGPSError => e
-    puts "Packet Error: #{e.inspect}"
-    p e.data
+    puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
+    puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
   rescue IOError => e
     puts "Port closed #{e.inspect}"
     exit
