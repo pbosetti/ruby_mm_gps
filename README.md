@@ -57,7 +57,7 @@ end
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/pbosetti/mm_gps.
+Bug reports and pull requests are welcome [on GitHub ](https://github.com/pbosetti/ruby_mm_gps).
 
 
 ## License
