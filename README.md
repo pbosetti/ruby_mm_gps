@@ -39,7 +39,7 @@ puts "Reading..."
 while not beacon.closed? do
   begin
     p beacon.get_packet
-  rescue GPSException => e
+  rescue MmGPSException => e
     puts "Packet Error: #{e.inspect}"
   rescue IOError => e
     puts "Port closed? #{e.inspect}"

@@ -29,12 +29,22 @@ static ushort CRC16(const void *buf, ushort length) {
   return (ushort)crc.w;
 }
 
+/* Calculate CRC16 checksum of a string
+ * 
+ * @param buf [String] the string to be checksummed
+ * @return [Fixnum] the CRC16 value
+ */
 static VALUE mm_gps_CRC16(VALUE klass, VALUE str)
 {
   Check_Type(str, T_STRING);
   return rb_fix_new(CRC16(RSTRING_PTR(str), RSTRING_LEN(str)));
 }
 
+/* Appends a CRC16 checksum to a string
+ * 
+ * @param buf [String] the starting string
+ * @return [String] the original string plus its CRC16
+ */
 static VALUE mm_gps_add_CRC16(VALUE klass, VALUE str)
 {
   union {
