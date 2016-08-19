@@ -33,7 +33,14 @@ beacon = MmGPS::Beacon.new(PORT, BAUD)
 beacon.trap # installs signal handler for CTRL-C
 
 puts "Syncing..."
-beacon.sync # discards any byte until the starting sequence "\xFFG" arrives
+begin
+  beacon.sync # discards any byte until the starting sequence "\xFFG" arrives
+rescue MmGPSException => e
+  puts "Packet Error: #{e.inspect}"
+rescue IOError => e
+  puts "Port closed #{e.inspect}"
+  exit
+end
 
 puts "Reading..."
 while not beacon.closed? do
@@ -42,7 +49,7 @@ while not beacon.closed? do
   rescue MmGPSException => e
     puts "Packet Error: #{e.inspect}"
   rescue IOError => e
-    puts "Port closed? #{e.inspect}"
+    puts "Port closed #{e.inspect}"
     exit
   end
 end
@@ -50,7 +57,7 @@ end
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/mm_gps.
+Bug reports and pull requests are welcome on GitHub at https://github.com/pbosetti/mm_gps.
 
 
 ## License
