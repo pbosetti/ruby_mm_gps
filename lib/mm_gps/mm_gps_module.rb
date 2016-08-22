@@ -53,7 +53,6 @@ module MmGPS
     unless valid_crc16?(buf) then
       raise MmGPSError.new("Invalid CRC", {reason: :nocrc, packet:buf, crc:crc16(buf)}) 
     end
-    # warn "Invalid CRC" unless valid_crc16?(buf)
     header = buf[0..5].unpack('CCS<C')
     if header[2] == 1 then # Regular GPS Data
       result = {}

@@ -21,7 +21,7 @@ module MmGPS
       @buffer = EMPTY
     end
     
-    # Istalls a signal handler for the given signal, default to SIGINT, 
+    # Installs a signal handler for the given signal, default to SIGINT, 
     # which closes the serialport connection. Further readings are likely to
     # trigger an IOError.
     # 
@@ -45,13 +45,12 @@ module MmGPS
       return @sp.closed?
     end
     
-    # Reads and discards incoming bytes until the START_TOKEN marrker is
+    # Reads and discards incoming bytes until the START_TOKEN marker is
     # received. Call this metod immediately after opening the connection
     # and before start reading the data.
     def sync
       self.get_raw_packet
     rescue MmGPSError => e
-      @buffer = START_TOKEN
     end
     
     # Reads a raw packet.
@@ -64,9 +63,9 @@ module MmGPS
           @buffer << char
         else
           raise MmGPSError.new("Data unavailable", 
-            {reason: :noavail, packet:buf}) 
+            {reason: :noavail, packet:@buffer}) 
         end
-        break if @buffer.ends_with? START_TOKEN
+        break if @buffer.end_with?(START_TOKEN)
       end
       @last_pkt = @buffer.slice!(0...-(START_TOKEN.length))
       return @last_pkt
@@ -74,13 +73,13 @@ module MmGPS
     
     # Reads a raw packet, checks its CRC, and returns its contents as a Hash.
     # 
-    # @return [Hash] typically in the form `%I(ts x y z f).zip(payload).to_h`
+    # @return [Hash|Array] typically in the form +%I(ts x y f).zip(payload).to_h+
     def get_packet
       return MmGPS::parse_packet(self.get_raw_packet)
     rescue MmGPSError => e
       if e.data[:reason] == :noavail then
         return nil
-      else 
+      else
         raise e
       end
     end

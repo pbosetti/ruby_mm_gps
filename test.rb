@@ -21,7 +21,8 @@ end
 puts "Reading..."
 while not beacon.closed? do
   begin
-    p beacon.get_packet
+    pkt = beacon.get_packet
+    p pkt if pkt
   rescue MmGPSError => e
     puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
     puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
