@@ -18,6 +18,7 @@ module MmGPS
       @sp.read_timeout = 1000 #1 sec
       @sp.binmode
       @last_pkt = ''.force_encoding(Encoding::BINARY)
+      @buffer = EMPTY
     end
     
     # Istalls a signal handler for the given signal, default to SIGINT, 
@@ -48,29 +49,26 @@ module MmGPS
     # received. Call this metod immediately after opening the connection
     # and before start reading the data.
     def sync
-      buf = EMPTY
-      begin
-        buf << (@sp.read(1) || EMPTY)
-        buf = buf[-2..-1] if buf.size > 2
-      end while buf != START_TOKEN
+      self.get_raw_packet
+    rescue MmGPSError => e
+      @buffer = START_TOKEN
     end
     
     # Reads a raw packet.
     #
     #  @return [String] a byte stream encoded with Encoding::BINARY
     def get_raw_packet
-      buf = START_TOKEN.dup
-      while true do
+      loop do
         char = @sp.read(1)
-        unless char
-          raise MmGPSError.new("Data unavailable", 
-            {reason: :noavail, packet:nil}) 
+        if char then
+          @buffer << char
         else
-          buf << char
+          raise MmGPSError.new("Data unavailable", 
+            {reason: :noavail, packet:buf}) 
         end
-        break if buf[-2..-1] == START_TOKEN
+        break if @buffer.ends_with? START_TOKEN
       end
-      @last_pkt = buf[0...-2]
+      @last_pkt = @buffer.slice!(0...-(START_TOKEN.length))
       return @last_pkt
     end
     
