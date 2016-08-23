@@ -4,7 +4,7 @@ module MmGPS
   # You may want (and can) to have more than one instance.
   # 
   # @example Typical usage:
-  #   beacon = MmGPS::Beacon.new(PORT, BAUD)
+  #   beacon = MmGPS::Beacon.new(PORT, baud: BAUD)
   #   beacon.trap # installs signal handler for CTRL-C
   #   
   #   # Standard each loop. Type CTRL-C for interrupting it
@@ -29,7 +29,7 @@ module MmGPS
     # 
     # @param port [String] 'COM1' on Windows, '/dev/ttyNNN' on *nix
     # @param baud [Fixnum] baudrate, value must be supported by the platform
-    def initialize(port, baud = 115200)
+    def initialize(port, baud: 115200)
       @port, @baud = port, baud
       self.open
     end

@@ -4,7 +4,7 @@ require 'mm_gps'
 PORT = "/dev/cu.usbmodem1411"
 BAUD = 115200 # SerialPort class does not support non-standard 500 kbps
 
-beacon = MmGPS::Beacon.new(PORT, BAUD)
+beacon = MmGPS::Beacon.new(PORT, baud: BAUD)
 beacon.trap # installs signal handler for CTRL-C
 
 # Standard each loop. Type CTRL-C for interrupting it
