@@ -7,27 +7,15 @@ BAUD = 115200 # SerialPort class does not support non-standard 500 kbps
 beacon = MmGPS::Beacon.new(PORT, BAUD)
 beacon.trap # installs signal handler for CTRL-C
 
-puts "Syncing..."
-begin
-  beacon.sync # discards any byte until the starting sequence "\xFFG" arrives
-rescue MmGPSError => e
-  puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
-  puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
-rescue IOError => e
-  puts "Port closed #{e.inspect}"
-  exit
+# Standard each loop. Type CTRL-C for interrupting it
+beacon.each do |packet|
+  p packet
 end
 
-puts "Reading..."
-while not beacon.closed? do
-  begin
-    pkt = beacon.get_packet
-    p pkt if pkt
-  rescue MmGPSError => e
-    puts "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
-    puts "Packet: #{MmGPS.hexify(e.data[:packet])}"
-  rescue IOError => e
-    puts "Port closed #{e.inspect}"
-    exit
-  end
-end
+
+# Use the enumerator:
+beacon.reopen      # Needed, since CTRL-C in previous example also closes the Serialport connection
+enum = beacon.each # gets the Enumerator
+p enum.take 10     # Next 10 packets from enum
+
+puts "Exiting"

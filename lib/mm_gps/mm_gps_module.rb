@@ -51,7 +51,7 @@ module MmGPS
   #   timestamp, coordinates, and error code (data code 0x0001). Otherwise returns an Array of Hashes for beacons status (data code 0x0002).
   def self.parse_packet(buf)
     unless valid_crc16?(buf) then
-      raise MmGPSError.new("Invalid CRC", {reason: :nocrc, packet:buf, crc:crc16(buf)}) 
+      raise MmGPSError.new("Invalid CRC", {reason: :nocrc, packet:buf, crc:("%04X" % crc16(buf[0...-2]))}) 
     end
     header = buf[0..5].unpack('CCS<C')
     if header[2] == 1 then # Regular GPS Data
@@ -72,7 +72,7 @@ module MmGPS
     else
       unless valid_crc16?(buf) then
         raise MmGPSError.new("Unexpected packet type #{header[2]}",
-          {reason: :notype, packet:buf, crc:crc16(buf), type:header[2]}) 
+          {reason: :notype, packet:buf, crc:("%04X" % crc16(buf[0...-2])), type:header[2]}) 
       end
     end
     return result
