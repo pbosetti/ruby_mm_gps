@@ -8,7 +8,7 @@ beacon = MmGPS::Beacon.new(PORT, baud: BAUD)
 beacon.trap # installs signal handler for CTRL-C
 
 # Standard each loop. Type CTRL-C for interrupting it
-File.open("dump.bin", 'w') do |f|
+File.open("dump.hex", 'w') do |f|
   beacon.each do |packet, raw|
     p packet
     puts MmGPS::hexify(raw)
