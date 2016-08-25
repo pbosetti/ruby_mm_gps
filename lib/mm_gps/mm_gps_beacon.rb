@@ -8,8 +8,9 @@ module MmGPS
   #   beacon.trap # installs signal handler for CTRL-C
   #   
   #   # Standard each loop. Type CTRL-C for interrupting it
-  #   beacon.each do |packet|
+  #   beacon.each do |packet, raw|
   #     p packet
+  #     puts MmGPS::hexify(raw)
   #   end
   # @example Using the enumerator:
   #   # Use the enumerator:
@@ -98,7 +99,7 @@ module MmGPS
       return enum_for(:each) unless block_given?
       loop do
         begin
-          yield self.get_packet
+          yield self.get_packet, @last_pkt
         rescue MmGPSError => e
           warn "Packet Error: #{e.inspect}, reason: #{e.data[:reason]}"
           warn "Packet: #{MmGPS.hexify(e.data[:packet])}"
@@ -121,8 +122,7 @@ module MmGPS
       if pkt.empty? then
         raise MmGPSError.new("Data unavailable", {reason: :noavail})
       end
-      @last_pkt = pkt
-      return @last_pkt
+      return @last_pkt = pkt
     end
     
     # Reads a raw packet, checks its CRC, and returns its contents as a Hash.

@@ -1,6 +1,8 @@
 #include "mm_gps.h"
 
+#ifndef uchar
 typedef unsigned char uchar;
+#endif
 
 typedef union { 
   ushort w;

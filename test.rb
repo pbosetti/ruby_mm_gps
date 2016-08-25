@@ -8,10 +8,13 @@ beacon = MmGPS::Beacon.new(PORT, baud: BAUD)
 beacon.trap # installs signal handler for CTRL-C
 
 # Standard each loop. Type CTRL-C for interrupting it
-beacon.each do |packet|
-  p packet
+File.open("dump.bin", 'w') do |f|
+  beacon.each do |packet, raw|
+    p packet
+    puts MmGPS::hexify(raw)
+    f.print(raw)
+  end
 end
-
 
 # Use the enumerator:
 beacon.reopen      # Needed, since CTRL-C in previous example also closes the Serialport connection
