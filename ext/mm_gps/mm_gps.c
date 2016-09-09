@@ -31,6 +31,44 @@ static ushort CRC16(const void *buf, ushort length) {
   return (ushort)crc.w;
 }
 
+
+#ifdef MRUBY_ENGINE
+#include <mruby/string.h>
+
+static mrb_value mrb_mm_gps_CRC16(mrb_state *mrb, mrb_value self)
+{
+  char *str = (char *)NULL;
+  mrb_int str_len = 0;
+  mrb_get_args(mrb, "s", &str, &str_len);
+  return mrb_fixnum_value(CRC16(str, str_len));
+}
+
+
+static mrb_value mrb_mm_gps_add_CRC16(mrb_state *mrb, mrb_value self)
+{
+  mrb_value str;
+  union {
+    ushort u;
+    char   s[2];
+  } crc;
+  
+  mrb_get_args(mrb, "S", &str);
+  crc.u = CRC16(RSTRING_PTR(str), RSTRING_LEN(str));
+  mrb_str_cat(mrb, str, crc.s, 2);
+  return str;
+}
+
+
+void mrb_mruby_mm_gps_gem_init(mrb_state *mrb) {
+  struct RClass *mm_gps = mrb_define_module(mrb, "MmGPS");
+  mrb_define_class_method(mrb, mm_gps, "crc16", mrb_mm_gps_CRC16, MRB_ARGS_REQ(1));
+  mrb_define_class_method(mrb, mm_gps, "append_crc16", mrb_mm_gps_add_CRC16, MRB_ARGS_REQ(1));
+}
+
+void mrb_mruby_mm_gps_gem_final(mrb_state *mrb) {}
+
+#else
+
 /* @overload crc16(buf)
  *   Calculate CRC16 checksum of a string
  *   
@@ -71,3 +109,7 @@ Init_mm_gps(void)
   rb_define_singleton_method(rb_mMmGPS, "crc16", mm_gps_CRC16, 1);
   rb_define_singleton_method(rb_mMmGPS, "append_crc16", mm_gps_add_CRC16, 1);
 }
+
+
+
+#endif

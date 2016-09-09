@@ -30,11 +30,11 @@ module MmGPS
     # 
     # @param port [String] 'COM1' on Windows, '/dev/ttyNNN' on *nix
     # @param baud [Fixnum] baudrate, value must be supported by the platform
-    def initialize(port, baud: 115200)
+    def initialize(port, baud=115200)
       @port, @baud = port, baud
       self.open
     end
-    
+        
     # Installs a signal handler for the given signal, default to +'SIGINT'+, 
     # which closes the serialport connection. Further readings are likely to
     # trigger an IOError.
